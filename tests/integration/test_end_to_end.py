@@ -13,7 +13,7 @@ input to final results.
 import pytest
 from science_live.pipeline import ScienceLivePipeline
 from science_live.core import EndpointManager, ConfigLoader
-from science_live.core.endpoints import TestNanopubEndpoint
+from science_live.core.endpoints import MockNanopubEndpoint
 from tests.fixtures.sample_questions import ALL_SAMPLE_QUESTIONS
 
 
@@ -25,7 +25,7 @@ class TestEndToEndPipeline:
     def pipeline(self):
         """Create a pipeline with test endpoint"""
         endpoint_manager = EndpointManager()
-        test_endpoint = TestNanopubEndpoint()
+        test_endpoint = MockNanopubEndpoint()
         endpoint_manager.register_endpoint('test', test_endpoint, is_default=True)
         
         return ScienceLivePipeline(endpoint_manager)
@@ -121,7 +121,7 @@ class TestEndToEndPipeline:
         config.app_name = "Test Pipeline"
         
         endpoint_manager = EndpointManager()
-        test_endpoint = TestNanopubEndpoint()
+        test_endpoint = MockNanopubEndpoint()
         endpoint_manager.register_endpoint('test', test_endpoint, is_default=True)
         
         pipeline = ScienceLivePipeline(endpoint_manager, config={'debug': True})
@@ -176,7 +176,7 @@ class TestPerformance:
     def pipeline(self):
         """Create pipeline for performance testing"""
         endpoint_manager = EndpointManager()
-        test_endpoint = TestNanopubEndpoint()
+        test_endpoint = MockNanopubEndpoint()
         endpoint_manager.register_endpoint('test', test_endpoint, is_default=True)
         
         return ScienceLivePipeline(endpoint_manager)

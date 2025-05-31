@@ -1,0 +1,29 @@
+/* Fix mermaid arrows in dark mode */
+@media (prefers-color-scheme: dark) {
+    /* Arrow markers (the actual arrowheads) */
+    .mermaid svg marker path {
+        fill: #ffffff !important;
+        stroke: #ffffff !important;
+    }
+    
+    /* Arrow lines */
+    .mermaid .flowchart-link {
+        stroke: #ffffff !important;
+        stroke-width: 2px !important;
+    }
+    
+    /* Alternative selector for arrows */
+    .mermaid svg defs marker path {
+        fill: #ffffff !important;
+    }
+}
+
+/* Force arrow visibility regardless of theme */
+.mermaid svg marker path {
+    fill: var(--pst-color-text-base, #ffffff) !important;
+}
+
+.mermaid .flowchart-link {
+    stroke: var(--pst-color-text-base, #ffffff) !important;
+    stroke-width: 2px !important;
+}

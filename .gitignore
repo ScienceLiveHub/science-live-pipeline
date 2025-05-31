@@ -172,3 +172,17 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# MyST build outputs
+_build
+
+# Documentation builds
+docs/_build/
+docs/apidocs/
+docs/api/
+_build/
+*.doctree
+
+# Sphinx auto-generated
+docs/modules.rst
+docs/science_live.rst

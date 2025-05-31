@@ -433,9 +433,9 @@ async def quick_process(question: str, endpoint_manager=None) -> NaturalLanguage
         print(result.summary)
     """
     if endpoint_manager is None:
-        from ..core.endpoints import EndpointManager, TestNanopubEndpoint
+        from ..core.endpoints import EndpointManager, MockNanopubEndpoint
         endpoint_manager = EndpointManager()
-        test_endpoint = TestNanopubEndpoint()
+        test_endpoint = MockNanopubEndpoint()
         endpoint_manager.register_endpoint('test', test_endpoint, is_default=True)
     
     pipeline = ScienceLivePipeline(endpoint_manager)

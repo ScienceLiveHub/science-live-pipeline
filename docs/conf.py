@@ -12,7 +12,7 @@ release = '0.0.1'
 # Extensions - use only myst_nb to avoid conflicts
 extensions = [
     'myst_nb',           # This handles both .md files AND notebooks
-    'autodoc2',
+    'sphinx_autodoc2', 
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
     'sphinx.ext.viewcode',

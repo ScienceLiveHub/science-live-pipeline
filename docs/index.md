@@ -86,12 +86,22 @@ Science Live addresses the silo problem by:
 3. Building knowledge graphs that reveal hidden connections across research domains
 4. Facilitating collaborative discovery through natural language exploration of the scientific record
 
-## Built on Proven Standards
+### Built on Proven Standards
 
 - **Nanopublications**: Structured scientific claims with provenance
 - **SPARQL**: Industry-standard semantic web queries
 - **FAIR Principles**: Ensuring data findability and reusability
 - **Rosetta Statements**: Standardized scientific claim representation
+
+### AI-Powered Processing Pipeline
+
+Science Live transforms natural language questions into structured scientific insights through a 7-step AI pipeline:
+
+**Question → Intent → Entities → Statements → Queries → Results → Answers**
+
+Each step applies domain-specific AI to ensure accurate, contextual scientific knowledge discovery.
+
+[**Learn the complete pipeline →**](getting-started/quickstart.md#understanding-the-pipeline)
 
 ## Community & Support
 

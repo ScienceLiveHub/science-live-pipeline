@@ -101,7 +101,7 @@ Science Live transforms natural language questions into structured scientific in
 
 Each step applies domain-specific AI to ensure accurate, contextual scientific knowledge discovery.
 
-[**Learn the complete pipeline →**](getting-started/quickstart.md#understanding-the-pipeline)
+[**Learn the complete pipeline →**](getting-started/index.md#understanding-the-pipeline)
 
 ## Community & Support
 

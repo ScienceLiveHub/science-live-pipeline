@@ -54,7 +54,9 @@ class EntityExtractorLinker:
             # Common pronouns
             'i', 'me', 'my', 'we', 'us', 'our', 'you', 'your', 'he', 'him', 'his', 
             'she', 'her', 'it', 'its', 'they', 'them', 'their',
-            'this', 'that', 'these', 'those'
+            'this', 'that', 'these', 'those',
+            # Common location/existence words that appear in phrases
+            'there', 'here', 'where', 'everywhere', 'anywhere', 'somewhere'
         }
     
     def _initialize_question_words(self) -> set:
@@ -340,15 +342,25 @@ class EntityExtractorLinker:
         if words[0] in self._function_words:
             return False
         
-        # Skip very generic combinations
+        # Skip very generic combinations and problematic patterns
         very_generic = {
             'need to', 'plan to', 'want to', 'have to', 'able to',
             'in order', 'such as', 'as well', 'in the', 'on the',
             'and plan', 'and knowledge', 'to assess', 'to plan',
             'what data', 'what is', 'what are', 'how do', 'how can',
-            'which are', 'which is', 'where are', 'when do'
+            'which are', 'which is', 'where are', 'when do',
+            # Additional problematic patterns from your example
+            'there ip', 'there is', 'there are', 'there was', 'there were',
+            'already been', 'been licensed', 'already been licensed',
+            'has been', 'have been', 'had been', 'will be', 'would be'
         }
         if phrase.lower() in very_generic:
+            return False
+        
+        # Check for verb-heavy phrases that aren't good entities
+        verb_indicators = ['been', 'already', 'have', 'has', 'had', 'will', 'would', 'could', 'should']
+        verb_count = sum(1 for word in words if word in verb_indicators)
+        if verb_count > len(words) * 0.5:  # More than 50% verb indicators
             return False
         
         # Must contain at least one substantial word (4+ chars) that's not a function word
@@ -360,6 +372,11 @@ class EntityExtractorLinker:
         function_and_boundary = self._function_words | self._boundary_words | self._question_words
         unwanted_count = sum(1 for w in words if w in function_and_boundary)
         if unwanted_count > len(words) * 0.4:  # Max 40% unwanted words
+            return False
+        
+        # Additional check: if phrase contains auxiliary verbs, it's probably not a good entity
+        auxiliary_verbs = {'is', 'are', 'was', 'were', 'been', 'being', 'have', 'has', 'had'}
+        if any(word in auxiliary_verbs for word in words):
             return False
         
         return True
@@ -402,10 +419,21 @@ class EntityExtractorLinker:
             'different', 'possible', 'available', 'necessary', 'main', 'current',
             'recent', 'general', 'specific', 'particular', 'various', 'certain',
             'similar', 'common', 'special', 'local', 'national', 'international',
+            # Additional generic words that shouldn't be entities
+            'potential', 'already', 'other', 'same', 'next', 'last', 'first',
+            'second', 'third', 'whole', 'full', 'real', 'total', 'final', 'complete',
+            'simple', 'easy', 'hard', 'difficult', 'free', 'open', 'clear', 'sure',
+            'ready', 'early', 'late', 'quick', 'slow', 'fast', 'strong', 'weak',
             # Common verbs that aren't typically entities
             'assess', 'plan', 'develop', 'create', 'provide', 'include', 'require',
             'ensure', 'support', 'maintain', 'establish', 'implement', 'improve',
-            'increase', 'reduce', 'change', 'manage', 'control', 'protect', 'prevent'
+            'increase', 'reduce', 'change', 'manage', 'control', 'protect', 'prevent',
+            'become', 'allow', 'follow', 'continue', 'remain', 'return', 'remember',
+            'consider', 'suggest', 'report', 'decide', 'expect', 'offer', 'appear',
+            # Past participles and gerunds that are often not entities
+            'based', 'used', 'done', 'made', 'given', 'taken', 'known', 'shown',
+            'found', 'seen', 'heard', 'told', 'asked', 'learned', 'studied',
+            'licensed', 'related', 'involved', 'required', 'provided', 'included'
         }
         if word_lower in very_common:
             return False

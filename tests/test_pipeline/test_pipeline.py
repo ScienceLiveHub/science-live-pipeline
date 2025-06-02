@@ -29,13 +29,25 @@ class TestScienceLivePipeline:
         # Make endpoint fail
         mock_endpoint = mock_endpoint_manager.get_endpoint.return_value
         mock_endpoint.execute_sparql.side_effect = Exception("Network error")
-        
+
         result = await pipeline.process("What is DNA?")
         
         # Should return error response gracefully
         assert result is not None
-        assert "Error processing question" in result.summary
-        assert len(result.suggestions) > 0
+    
+        # Should indicate network connectivity issue, not just "no results"
+        assert ("network" in result.summary.lower() or 
+                "connectivity" in result.summary.lower() or
+                "unable to search" in result.summary.lower())
+    
+        # Should have network-specific suggestions
+        suggestions_text = " ".join(result.suggestions).lower()
+        assert ("try again" in suggestions_text or 
+                "connection" in suggestions_text or
+                "temporarily unavailable" in suggestions_text)
+    
+        # Pipeline should complete all steps
+        assert result.execution_summary['pipeline_steps_completed'] == 7
     
     @pytest.mark.asyncio
     async def test_batch_processing(self, pipeline):

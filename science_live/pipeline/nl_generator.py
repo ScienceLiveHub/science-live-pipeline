@@ -177,7 +177,7 @@ class NaturalLanguageGenerator:
     
     def _generate_execution_summary(self, context: ProcessingContext) -> Dict[str, Any]:
         """Generate summary of execution process"""
-        total_time = asyncio.get_event_loop().time() - context.start_time
+        total_time = context.get_elapsed_time()  # Use the context's elapsed time method
         
         return {
             'total_execution_time': round(total_time, 2),
@@ -185,19 +185,40 @@ class NaturalLanguageGenerator:
             'pipeline_steps_completed': 7,
             'debug_mode': context.debug_mode
         }
-    
+           
     def _generate_no_results_response(self, context: ProcessingContext) -> NaturalLanguageResult:
         """Generate response when no results found"""
-        return NaturalLanguageResult(
-            summary="No results found for your query.",
-            detailed_results=[],
-            confidence_explanation="Unable to find matching information in the nanopub network.",
-            suggestions=[
+            
+        # Check if we have execution errors that might explain no results
+        execution_errors = getattr(context, 'execution_errors', [])
+        network_errors = [err for err in execution_errors if 'network' in str(err).lower() or 'connection' in str(err).lower()]
+    
+        if network_errors:
+            # Network error caused no results
+            summary = "Unable to search nanopublications due to network connectivity issues."
+            confidence_explanation = "Could not connect to the nanopublication network to process your query."
+            suggestions = [
+                "Please try again in a few moments",
+                "Check your internet connection",
+                "The nanopublication servers may be temporarily unavailable",
+                "Try a simpler query if the problem persists"
+            ]
+        else:
+            # Normal no results case
+            summary = "No results found for your query."
+            confidence_explanation = "Unable to find matching information in the nanopub network."
+            suggestions = [
                 "Check spelling and try different terms",
-                "Use more general concepts",
+                "Use more general concepts", 
                 "Try asking about related topics",
                 "Include specific identifiers like DOI or ORCID if available"
-            ],
+            ]
+    
+        return NaturalLanguageResult(
+            summary=summary,
+            detailed_results=[],
+            confidence_explanation=confidence_explanation,
+            suggestions=suggestions,
             execution_summary=self._generate_execution_summary(context)
         )
 

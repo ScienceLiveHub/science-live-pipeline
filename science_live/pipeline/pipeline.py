@@ -192,7 +192,30 @@ class ScienceLivePipeline:
             self.logger.info(f"Pipeline completed successfully in {execution_time:.2f}s")
             
             return final_result
-            
+        except ValueError as e:
+            # Handle validation errors specifically
+            execution_time = context.get_elapsed_time()
+            self.logger.error(f"Validation error after {execution_time:.2f}s: {str(e)}")
+        
+            return NaturalLanguageResult(
+                summary=f"Error processing question: {str(e)}",
+                detailed_results=[],
+                confidence_explanation="Question validation failed",
+                suggestions=[
+                    "Please provide a valid question",
+                    "Check that your question is not empty",
+                    "Try rephrasing your question",
+                    "Include specific terms or concepts"
+                ],
+                execution_summary={
+                    'error': str(e),
+                    'error_type': 'ValidationError',
+                    'total_execution_time': execution_time,
+                    'pipeline_steps_completed': 0,
+                    'debug_mode': context.debug_mode
+                }
+            )
+        
         except Exception as e:
             # Handle pipeline errors gracefully
             execution_time = context.get_elapsed_time()

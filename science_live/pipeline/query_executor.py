@@ -36,7 +36,11 @@ class QueryExecutor:
     async def execute(self, generated_queries: GeneratedQueries, context: ProcessingContext) -> QueryResults:
         """Execute SPARQL queries with fallback strategy"""
         self.logger.info("Executing SPARQL queries")
-        
+
+        # Initialize execution errors tracking
+        if not hasattr(context, 'execution_errors'):
+            context.execution_errors = []
+
         # Try primary query first
         result = await self._execute_single_query(generated_queries.primary_query, context)
         
@@ -44,6 +48,10 @@ class QueryExecutor:
             self.logger.info(f"Primary query succeeded with {result.total_results} results")
             return result
         
+        # If primary failed due to error (not just no results), track it
+        if not result.success and result.error_message:
+            context.execution_errors.append(f"Primary query failed: {result.error_message}")
+    
         # Try fallback queries
         for i, fallback_query in enumerate(generated_queries.fallback_queries):
             self.logger.info(f"Trying fallback query {i+1}")
@@ -52,6 +60,8 @@ class QueryExecutor:
             if result.success and result.total_results > 0:
                 self.logger.info(f"Fallback query {i+1} succeeded with {result.total_results} results")
                 return result
+            elif not result.success and result.error_message:
+                context.execution_errors.append(f"Fallback query {i+1} failed: {result.error_message}")
         
         # All queries failed - return last result with error info
         self.logger.warning("All queries failed")

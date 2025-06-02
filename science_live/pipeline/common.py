@@ -13,6 +13,7 @@ from abc import ABC, abstractmethod
 from typing import Dict, List, Optional, Any, Union, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
+import time
 import asyncio
 from datetime import datetime
 
@@ -82,12 +83,12 @@ class ProcessingContext:
     session_id: Optional[str] = None
     preferences: Dict[str, Any] = field(default_factory=dict)
     debug_mode: bool = False
-    start_time: float = field(default_factory=lambda: asyncio.get_event_loop().time())
+    start_time: float = field(default_factory=lambda: time.perf_counter())  # Use perf_counter for consistent timing
     metadata: Dict[str, Any] = field(default_factory=dict)
     
     def get_elapsed_time(self) -> float:
         """Get elapsed time since pipeline started"""
-        return asyncio.get_event_loop().time() - self.start_time
+        return time.perf_counter() - self.start_time
 
 # ============================================================================
 # STEP 1: QUESTION PROCESSING
@@ -322,7 +323,9 @@ class PipelineStep(ABC):
 
 def validate_processing_context(context: ProcessingContext) -> bool:
     """Validate processing context"""
-    if not context.original_question or not context.original_question.strip():
+    # Allow empty questions to pass validation - they should be handled gracefully
+    # The pipeline should handle empty questions in the question processor step
+    if not hasattr(context, 'original_question'):
         return False
     return True
 

@@ -52,7 +52,10 @@ class QuestionProcessor(PipelineStep):
                 r'\bwhat\b', r'\bwhich\b', r'\bdefine\b', r'\bexplain\b'
             ],
             QuestionType.WHO.value: [
-                r'\bwho\b', r'\bwhom\b', r'\bwhose\b', r'\bauthor\b'
+                r'\bwho\b', r'\bwhom\b', r'\bwhose\b',  # Simple - include all "who" questions
+                r'\bauthor(?:ed)?\s+by\b',  # "authored by" or "author by"  
+                r'\bwritten\s+by\b',  # "written by"
+                r'\bcreated\s+by\b'   # "created by"
             ],
             QuestionType.WHERE.value: [
                 r'\bwhere\b', r'\blocation\b', r'\blocated\b'
@@ -67,8 +70,9 @@ class QuestionProcessor(PipelineStep):
                 r'\bwhy\b', r'\breason\b', r'\bcause\b'
             ],
             QuestionType.LIST.value: [
-                r'\blist\b', r'\bshow\b', r'\bfind\b', r'\bdisplay\b',
-                r'\benumerate\b', r'\bidentify\b'
+                r'\blist\b', r'\bshow\s+(?:me\s+)?all\b', r'\bfind\s+all\b', 
+                r'\bdisplay\s+all\b', r'\benumerate\b', r'\bidentify\s+all\b',
+                r'\ball\s+\w+\s+by\b', r'papers\s+by\b'  # "papers by" indicates listing
             ],
             QuestionType.COUNT.value: [
                 r'\bhow many\b', r'\bcount\b', r'\bnumber of\b',
@@ -112,6 +116,11 @@ class QuestionProcessor(PipelineStep):
         # Clean the question
         cleaned = self._clean_question(question)
         
+        # Check if cleaned question is empty or only punctuation
+        if not cleaned or not cleaned.strip() or re.match(r'^[?!.\s]*$', cleaned):
+            raise ValueError("Question cannot be empty")
+
+
         # Classify question type and assess confidence
         q_type, confidence = self._classify_question_type(cleaned)
         
@@ -146,6 +155,11 @@ class QuestionProcessor(PipelineStep):
         
         # Normalize punctuation
         cleaned = re.sub(r'[?!.]+$', '?', cleaned)
+
+        # Check if question is only punctuation (treat as empty)
+        if re.match(r'^[?!.\s]*$', cleaned):
+            return ""  # Treat punctuation-only as empty
+
         
         # Ensure question ends with question mark if it's interrogative
         if not cleaned.endswith('?') and self._is_interrogative(cleaned):
@@ -179,6 +193,12 @@ class QuestionProcessor(PipelineStep):
             if score > 0:
                 scores[q_type] = score
         
+            # Special handling for common conflicts
+        if 'list' in scores and 'who' in scores:
+            # If we have both LIST and WHO patterns, prefer LIST for "papers by" type questions
+            if re.search(r'(?:list|show|find|all)\s+.*(?:papers|work|publications)\s+by\b', question_lower):
+                scores['list'] = scores.get('list', 0) + 3  # Boost LIST score
+
         if not scores:
             return QuestionType.GENERAL, 0.5
         

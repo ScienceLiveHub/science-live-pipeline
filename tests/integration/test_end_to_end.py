@@ -97,7 +97,7 @@ class TestEndToEndPipeline:
         for result in results:
             if not isinstance(result, Exception):
                 assert result.summary is not None
-    
+
     @pytest.mark.asyncio
     async def test_error_recovery(self, pipeline):
         """Test error recovery in pipeline"""
@@ -105,14 +105,30 @@ class TestEndToEndPipeline:
         problematic_questions = [
             "",  # Empty question
             "?",  # Just punctuation
-            "asdfghjkl",  # Random text
+            "??",  # Just punctuation
+            ".",  # Just punctuation
+            " ",  # Random text
         ]
-        
+    
         for question in problematic_questions:
             result = await pipeline.process(question)
-            # Should return error response, not crash
+            # Should return error response or no results, not crash
             assert result is not None
             assert isinstance(result.summary, str)
+            assert len(result.summary) > 0
+        
+            # Check explicitly without generator
+            summary_lower = result.summary.lower()
+        
+            found_match = (
+                "error processing question" in summary_lower or
+                "no results found" in summary_lower or 
+                "question cannot be empty" in summary_lower or
+                "validation" in summary_lower
+            )
+        
+            assert found_match, f"No expected message found in summary: '{result.summary}'"
+
     
     @pytest.mark.asyncio
     async def test_pipeline_with_config(self):

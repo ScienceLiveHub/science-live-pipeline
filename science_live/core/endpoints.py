@@ -14,7 +14,7 @@ import aiohttp
 import asyncio
 import logging
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Tuple
 from urllib.parse import urljoin
 import json
 
@@ -150,12 +150,22 @@ class StandardNanopubEndpoint(NanopubEndpoint):
 class MockNanopubEndpoint(NanopubEndpoint):
     """Test nanopub endpoint with mock data"""
     
-    def __init__(self, base_url: str = "https://test.nanopub.org"):
+    def __init__(self, base_url: str = "https://test.nanopub.org", simulate_delay: bool = True, delay_range: Tuple[float, float] = (0.01, 0.05)):
         self.base_url = base_url
         self.logger = logging.getLogger(self.__class__.__name__)
-    
+        self.simulate_delay = simulate_delay
+        self.delay_range = delay_range
+
+    async def _simulate_network_delay(self):
+        """Simulate realistic network delay for testing"""
+        if self.simulate_delay:
+            import random
+            delay = random.uniform(*self.delay_range)
+            await asyncio.sleep(delay)
+ 
     async def execute_sparql(self, query: str) -> Dict[str, Any]:
-        """Return mock SPARQL results"""
+        """Return mock SPARQL results with simulated delay"""
+        await self._simulate_network_delay()
         # Simple mock response
         return {
             'results': {
@@ -177,7 +187,8 @@ class MockNanopubEndpoint(NanopubEndpoint):
         }
     
     async def fetch_nanopub(self, uri: str) -> Dict[str, Any]:
-        """Return mock nanopub data"""
+        """Return mock nanopub data with simulated delay"""
+        await self._simulate_network_delay()
         return {
             'uri': uri,
             'format': 'trig',
@@ -186,7 +197,8 @@ class MockNanopubEndpoint(NanopubEndpoint):
         }
     
     async def search_text(self, text: str, limit: int = 10) -> List[Dict]:
-        """Return mock search results"""
+        """Return mock search results with simulated delay"""
+        await self._simulate_network_delay()
         return [
             {'np': 'http://purl.org/np/test1', 'label': f'Test result for: {text}', 'score': 0.9},
             {'np': 'http://purl.org/np/test2', 'label': f'Another result for: {text}', 'score': 0.7}

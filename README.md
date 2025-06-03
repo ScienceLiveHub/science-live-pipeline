@@ -19,6 +19,12 @@ pip install -e .[enhanced]
  pip install -e ".[dev,enhanced]"
 ```
 
+### Tests
+
+```
+pytest tests/ -v
+```
+
 ### Setup WordNet (one command!)
 
 ```

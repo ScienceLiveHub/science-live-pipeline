@@ -5,10 +5,30 @@
 Science Live core pipeline
 
 
-## Installation of science live in dev mode
+## Installation of science live 
+
+### In production mode
+
+```bash
+pip install -e .[enhanced]
+```
+
+### In development mode
 
 ```
- pip install -e ".[dev]"
+ pip install -e ".[dev,enhanced]"
+```
+
+### Setup WordNet (one command!)
+
+```
+setup-wordnet
+```
+
+### Validate installation  
+
+```
+validate-science-live --full
 ```
 
 ## Installation of the science live documentation

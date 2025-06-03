@@ -284,7 +284,13 @@ class TestEnums:
 # ============================================================================
 
 import pytest
-from science_live.pipeline.question_processor import QuestionProcessor, is_valid_question
+try:
+    from science_live.pipeline.question_processor import QuestionProcessor, is_valid_question
+    _QUESTION_PROCESSOR_AVAILABLE = True
+except ImportError:
+    _QUESTION_PROCESSOR_AVAILABLE = False
+    QuestionProcessor = None
+    is_valid_question = None
 from science_live.pipeline.common import ProcessingContext, QuestionType
 
 

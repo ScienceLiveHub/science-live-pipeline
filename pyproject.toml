@@ -30,6 +30,7 @@ dependencies = [
     "pydantic>=1.10.0",
     "pyyaml>=6.0",
     "rdflib>=6.0.0",
+    "wn>=0.12.0",  # WordNet integration for enhanced question processing
 ]
 
 [project.optional-dependencies]
@@ -59,10 +60,25 @@ docs = [
 nlp = [
     "spacy>=3.4.0",
     "transformers>=4.20.0",
+    "wn>=0.12.0",  # Ensure WordNet is available for NLP features
+    "nltk>=3.8.0",  # Additional NLP tools that work well with WordNet
 ]
 viz = [
     "networkx>=2.8.0",
     "plotly>=5.10.0",
+]
+# Enhanced question processing with full semantic features
+enhanced = [
+    "wn>=0.12.0",
+    "spacy>=3.4.0",
+    "nltk>=3.8.0",
+]
+# Research/academic specific tools
+research = [
+    "wn>=0.12.0",
+    "scholarly>=1.6.0",  # Academic paper metadata
+    "crossref-commons>=0.0.7",  # DOI resolution
+    "requests>=2.28.0",  # For API calls
 ]
 
 [project.urls]
@@ -70,6 +86,26 @@ Homepage = "https://github.com/ScienceLiveHub/science-live-pipeline"
 Documentation = "https://sciencelivehub.github.io/science-live-pipeline"
 Repository = "https://github.com/ScienceLiveHub/science-live-pipeline"
 Issues = "https://github.com/ScienceLiveHub/science-live-pipeline/issues"
+
+# ============================================================================
+# MODERN APPROACH: Console Scripts in pyproject.toml
+# ============================================================================
+
+[project.scripts]
+# Main setup commands
+science-live-setup = "science_live.setup.main:main"
+science-live-setup-wordnet = "science_live.setup.wordnet:main"
+science-live-setup-dev = "science_live.setup.dev:main"
+science-live-validate = "science_live.setup.validate:main"
+
+# Convenience aliases
+setup-wordnet = "science_live.setup.wordnet:main"
+setup-dev = "science_live.setup.dev:main"
+validate-science-live = "science_live.setup.validate:main"
+
+# Pipeline testing and utilities
+science-live-test = "science_live.utils.test_runner:main"
+science-live-demo = "science_live.demo.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
@@ -89,6 +125,7 @@ markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "integration: marks tests as integration tests",
     "unit: marks tests as unit tests",
+    "requires_wordnet: marks tests that require WordNet data",  # New marker
 ]
 asyncio_mode = "strict"
 asyncio_default_fixture_loop_scope = "function"
